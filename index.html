@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Get Key với Nhiệm Vụ</title>
+<style>
+:root{--bg1:#6a11cb;--bg2:#2575fc;--accent:#ff0099;--btn-bg:#fff;--btn-color:#222;}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,"Segoe UI",Roboto,Arial;background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--accent));color:white;padding:30px;background-size:400% 400%;animation:move 10s ease infinite;}
+@keyframes move{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.card{width:100%;max-width:420px;background:rgba(255,255,255,0.08);border-radius:14px;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,0.25);text-align:center;}
+h1{margin:0 0 12px;font-size:20px;}p{margin:0 0 18px;opacity:0.9;font-size:14px;}
+.controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
+button{border:0;cursor:pointer;padding:12px 18px;border-radius:10px;font-weight:600;box-shadow:0 6px 14px rgba(0,0,0,0.25);transition: transform .12s ease, opacity .12s ease;}
+button:active{transform:translateY(1px) scale(.997);}
+.get-btn{background:var(--btn-bg);color:var(--btn-color);}
+.copy-btn{background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.12);}
+.copy-btn[disabled]{opacity:.45;cursor:not-allowed;}
+.keybox{margin-top:6px;background: rgba(0,0,0,0.25);padding:14px 12px;border-radius:10px;font-family:"Courier New", monospace;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;min-height:48px;word-break:break-all;}
+.msg{margin-top:12px;font-size:13px;opacity:0.9;height:18px;}
+.small{font-size:12px;opacity:0.85;margin-top:8px;}
+.task {margin:8px 0; background:rgba(255,255,255,0.1); padding:10px; border-radius:8px; cursor:pointer;}
+.task.completed{background:rgba(0,255,0,0.2);}
+#taskContainer{display:none;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🔑 Get Key</h1>
+  <p>Nhấn <strong>Get Key</strong> để bắt đầu nhiệm vụ và lấy key hợp lệ</p>
+
+  <div class="controls">
+    <button class="get-btn" id="getKeyBtn">Get Key</button>
+    <button class="copy-btn" id="copyBtn" disabled>Copy Key</button>
+  </div>
+
+  <div id="taskContainer">
+    <div class="task" data-done="false" data-link="">Nhiệm vụ 1: Xem quảng cáo</div>
+    <div class="task" data-done="false" data-link="">Nhiệm vụ 2: Click link</div>
+    <div class="task" data-done="false" data-link="">Nhiệm vụ 3: Hoàn tất khảo sát</div>
+    <button id="completeBtn" disabled>Hoàn thành</button>
+  </div>
+
+  <div class="keybox" id="keyBox">— Chưa có key —</div>
+  <div class="msg" id="msg"></div>
+  <div class="small">Mã được lấy từ server JSON.</div>
+</div>
+
+<script>
+const getKeyBtn = document.getElementById('getKeyBtn');
+const copyBtn = document.getElementById('copyBtn');
+const keyBox = document.getElementById('keyBox');
+const msg = document.getElementById('msg');
+const taskContainer = document.getElementById('taskContainer');
+const tasks = document.querySelectorAll('.task');
+const completeBtn = document.getElementById('completeBtn');
+
+const KeySystemURL = "https://pastefy.app/YUvoIFpl/raw";
+let keysList = [];
+
+async function fetchKeys() {
+  try {
+    const res = await fetch(KeySystemURL);
+    const data = await res.json();
+    keysList = Object.keys(data);
+  } catch(e) {
+    console.error("Không thể lấy keys:", e);
+    msg.textContent = "⚠️ Lỗi tải key từ server!";
+  }
+}
+
+function generateRandomKey() {
+  if(keysList.length === 0) return null;
+  const idx = Math.floor(Math.random() * keysList.length);
+  return keysList[idx];
+}
+
+// Bắt đầu nhiệm vụ
+getKeyBtn.addEventListener('click', () => {
+  getKeyBtn.style.display = 'none';
+  taskContainer.style.display = 'block';
+});
+
+// Xử lý click nhiệm vụ → mở popup
+tasks.forEach(task => {
+  task.addEventListener('click', () => {
+    if(task.dataset.done === "true") return;
+    const popup = window.open(task.dataset.link, "_blank", "width=500,height=500");
+    const timer = setInterval(() => {
+      if(popup.closed) {
+        clearInterval(timer);
+        task.dataset.done = "true";
+        task.classList.add('completed');
+        checkAllDone();
+      }
+    }, 500);
+  });
+});
+
+function checkAllDone() {
+  const allDone = Array.from(tasks).every(t => t.dataset.done === "true");
+  completeBtn.disabled = !allDone;
+}
+
+// Khi hoàn thành → fetch key từ Pastefy và hiển thị
+completeBtn.addEventListener('click', async () => {
+  if(keysList.length === 0) await fetchKeys();
+  const key = generateRandomKey();
+  if(!key) return;
+  keyBox.textContent = key;
+  copyBtn.disabled = false;
+  msg.textContent = "✅ Key đã tạo";
+  setTimeout(() => msg.textContent = '', 2200);
+});
+
+// Copy key
+copyBtn.addEventListener('click', () => {
+  const key = keyBox.textContent.trim();
+  if(!key || key.startsWith('—')) return;
+  navigator.clipboard.writeText(key).then(() => {
+    msg.textContent = "✅ Đã sao chép vào clipboard";
+    setTimeout(() => msg.textContent = '', 1800);
+  });
+});
+</script>
+</body>
+</html>
