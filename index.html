@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Get Key với Nhiệm Vụ</title>
+<title>Get Key</title>
 <style>
 :root{--bg1:#6a11cb;--bg2:#2575fc;--accent:#ff0099;--btn-bg:#fff;--btn-color:#222;}
 body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,"Segoe UI",Roboto,Arial;background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--accent));color:white;padding:30px;background-size:400% 400%;animation:move 10s ease infinite;}
@@ -27,7 +27,8 @@ button:active{transform:translateY(1px) scale(.997);}
 <body>
 <div class="card">
   <h1>🔑 Get Key</h1>
-  <p>Nhấn <strong>Get Key</strong> để bắt đầu nhiệm vụ và lấy key hợp lệ</p>
+  <p>Key Will Be Generated Upon Mission Completion</p>
+<p>Click Get Key, Task And re-visiting the website will complete</p>
 
   <div class="controls">
     <button class="get-btn" id="getKeyBtn">Get Key</button>
@@ -35,15 +36,15 @@ button:active{transform:translateY(1px) scale(.997);}
   </div>
 
   <div id="taskContainer">
-    <div class="task" data-done="false" data-link="">Nhiệm vụ 1: Xem quảng cáo</div>
-    <div class="task" data-done="false" data-link="">Nhiệm vụ 2: Click link</div>
-    <div class="task" data-done="false" data-link="">Nhiệm vụ 3: Hoàn tất khảo sát</div>
-    <button id="completeBtn" disabled>Hoàn thành</button>
+    <div class="task" data-done="false" data-link="youtube.com">Task 1</div>
+    <div class="task" data-done="false" data-link="youtube.com">Task 2</div>
+    <div class="task" data-done="false" data-link="youtube.com">Task 3</div>
+    <button id="completeBtn" disabled>Complete</button>
   </div>
 
-  <div class="keybox" id="keyBox">— Chưa có key —</div>
+  <div class="keybox" id="keyBox"></div>
   <div class="msg" id="msg"></div>
-  <div class="small">Mã được lấy từ server JSON.</div>
+  <div class="small">Get Key For Scripts</div>
 </div>
 
 <script>
@@ -55,7 +56,7 @@ const taskContainer = document.getElementById('taskContainer');
 const tasks = document.querySelectorAll('.task');
 const completeBtn = document.getElementById('completeBtn');
 
-const KeySystemURL = "https://pastefy.app/YUvoIFpl/raw";
+const KeySystemURL = "https://pastefy.app/ovOo89gE/raw";
 let keysList = [];
 
 async function fetchKeys() {
@@ -65,7 +66,7 @@ async function fetchKeys() {
     keysList = Object.keys(data);
   } catch(e) {
     console.error("Không thể lấy keys:", e);
-    msg.textContent = "⚠️ Lỗi tải key từ server!";
+    msg.textContent = "Error downloading key from server!";
   }
 }
 
@@ -109,7 +110,7 @@ completeBtn.addEventListener('click', async () => {
   if(!key) return;
   keyBox.textContent = key;
   copyBtn.disabled = false;
-  msg.textContent = "✅ Key đã tạo";
+  msg.textContent = "Key created!";
   setTimeout(() => msg.textContent = '', 2200);
 });
 
@@ -118,7 +119,7 @@ copyBtn.addEventListener('click', () => {
   const key = keyBox.textContent.trim();
   if(!key || key.startsWith('—')) return;
   navigator.clipboard.writeText(key).then(() => {
-    msg.textContent = "✅ Đã sao chép vào clipboard";
+    msg.textContent = "Copied to clipboard";
     setTimeout(() => msg.textContent = '', 1800);
   });
 });
